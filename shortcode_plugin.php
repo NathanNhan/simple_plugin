@@ -27,10 +27,12 @@ if(!class_exists('ShortcodePlugin')) {
    add_action('wp_enqueue_scripts', array($this, 'load_assets'));
    add_action( 'admin_menu', array($this, 'custom_admin_menu') );
    add_shortcode('shortcode_authors', array($this, 'render_authors'));
+   add_shortcode('authors_by_name', array($this, 'render_author_by_name'));
   }
 
   function custom_admin_menu() {
     add_menu_page( 'Shortcode Author', 'Shortcode Author', 'manage_options', 'shortcode-authors', array($this, 'render_shortcode'), '', 10 );
+    add_submenu_page( 'shortcode-authors', 'Short code Attribute', 'Shortcode Attr', 'manage_options', 'shortcode-attr', array($this, 'render_attr_shortcode') );
   }
   //List Employees
   function render_shortcode() {
@@ -38,6 +40,14 @@ if(!class_exists('ShortcodePlugin')) {
       <h3 class="text-center">Shortcode Display Top 3 Author with 1 latest post</h3>
       <p>Shortcode: [shortcode_authors]</p>
     <?php 
+  }
+
+  function render_attr_shortcode () {
+    ?>
+      <h3 class="text-center">Shortcode Display Top 3 Author with 1 latest post</h3>
+      <p>Shortcode: [authors_by_name] có thể gán thuộc tính cho shortcode </p>
+      <span>Example: [authors_by_name name='a']</span>
+    <?php
   }
 
   //Render shortcode
@@ -66,6 +76,37 @@ if(!class_exists('ShortcodePlugin')) {
     $html .= "</div>";
 
     return $html;
+
+
+  }
+
+
+  function render_author_by_name($attr) {
+    global $wpdb;
+
+    $name = $attr['name'];
+    $authors = $wpdb->get_results("select * from wp_users where user_nicename LIKE '%$name%'", ARRAY_A);
+
+    $html = '';
+    $html .= "<div class='container'>";
+    $html .= "<div class='row'>";
+      foreach ($authors as $item) {
+        $html .= "<div class='col-4'>";
+        $html .= "<div class='card'>";
+        $html .= "<img src=" . get_avatar_url($item['ID']) . "class='card-img-top'  alt='...'>";
+        $html .= "<div class='card-body'>";
+        $html .= "<h5 class='card-title'>" . get_author_name($item['ID']) . "</h5>";
+        $html .= "<p class='card-text'>" . $item['user_email'] . "</p>";
+        $html .= "</div>";
+        $html .= "</div>";
+        $html .= "</div>";
+
+    }
+        $html .= "</div>";
+        $html .= "</div>";
+
+        return $html;
+
 
 
   }
